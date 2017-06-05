@@ -1,6 +1,4 @@
-// Main board to control sync signal
-// last edited on 2/17/2016
-// Sunmee Park
+//AKHIL Bandi
 
 #define PIN_GLOBAL_SYNC        2        // starts board 1, and sends out the signal to the board 2
 
@@ -153,7 +151,7 @@ void loop() {
         delay(500);
 
         if (count < 8){
-          if (single_pulse_count < 6){
+          if (single_pulse_count < 8){
             
             if (single_pulse_count == 0){
 
@@ -165,31 +163,41 @@ void loop() {
             delay(1000);
             switch(single_pulse_count) {
               case 0:
+                Serial.print(1);
+                Serial.println("msec duration");
+                trigger(1);
+                break;
+              case 1:
+                Serial.print(3);
+                Serial.println("msec duration");
+                trigger(3);
+                break;
+              case 2:
                 Serial.print(5);
                 Serial.println("msec duration");
                 trigger(5);
                 break;
-              case 1:          
+              case 3:          
                 Serial.print(10);
                 Serial.println("msec duration");
                 trigger(10);
                 break;
-              case 2:
+              case 4:
                 Serial.print(20);
                 Serial.println("msec duration");
                 trigger(20);
                 break;
-              case 3:
+              case 5:
                 Serial.print(50);
                 Serial.println("msec duration");
                 trigger(50);
                 break;
-              case 4:
+              case 6:
                 Serial.print(100);
                 Serial.println("msec duration");
                 trigger(100);
                 break;
-              case 5:
+              case 7:
                 Serial.print(1000);
                 Serial.println ("msec duration");
                 trigger(1000);
@@ -202,13 +210,13 @@ void loop() {
             single_pulse_count ++;
           } 
           
-          if (single_pulse_count == 6) {
+          if (single_pulse_count == 8) {
             count++;
             single_pulse_count = 0;
           }
 
         }
-        else if (count <= 15) {
+        else if (count = 15) {
           if (single_pulse_count < 3){
               
               if (single_pulse_count == 0){
@@ -221,13 +229,13 @@ void loop() {
               //delay(1000);
               switch(single_pulse_count) {
                 case 0:
-                  trigger(100);
-                  Serial.print(100);
+                  trigger(1);
+                  Serial.print(1);
                   Serial.println("msec duration");
                   break;
                 case 1:
-                  trigger(1000);
-                  Serial.print(1000);
+                  trigger(3);
+                  Serial.print(3);
                   Serial.println("msec duration");
                   break;
 //                case 2:
