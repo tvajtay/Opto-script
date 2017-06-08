@@ -30,20 +30,21 @@ boolean onPulse = false;
 int single_pulse_count = 0;
 
 int pulse_count = 0;
-int t_duration = 20; // longer than 10msec
+int t_duration = 5; // longer than 10msec
 //int freqArray[21] = {1,2,3,5,6,8,10,12,14,16,18,20,22,24,26,28,30,35,40,45,50} ; for mouse 1,2
-int freqArray[6] = {1, 3, 7, 10, 15, 20}; //Array containing the frequency values for Pulsetrain and Stim-Frequency trials in Hz
+int freqArray[6] = {1, 3, 7, 10, 15, 20}; //Array containing the frequency values for Pulsetrain trials in Hz
+int stimfreqarray[2] = {10, 100};          //Array containing the frequency values for Stim-Frequency trials in Hz
 int freq;                            //In C/C++/Arduino array indices begin with position 0
 int dur_count = 0;
 int signalChange = 0;
 int freq_count = 0;
 int loop_count = 0;
 int freq_flag = 0;
-int ISI = 1000    //Inter stimuli interval used in Stim-Frequency trial, this is time interval between the initial stimuli and the frequency stimuli
+int ISI = 1000;    //Inter stimuli interval used in Stim-Frequency trial, this is time interval between the initial stimuli and the frequency stimuli
 
-          /*-------------------------
-            functions
-            -------------------------*/
+/*-------------------------
+  functions
+  -------------------------*/
 
 void setup() {
 
@@ -66,20 +67,26 @@ void setup() {
   Serial.println("Enter b to start stim-frequency trials");
   Serial.println("Enter i to start 15 50msec pulses for intensity stimulation");
   Serial.println("Enter o to start 8 50msec pulses for intensity stimulation");
-  Serial.println("You can enter q(quit) during recording or p (pause)");
-  Serial.println("Enter q to quit recording");
+  Serial.println("Enter p to pause session");
+  Serial.println("Enter q to quit/restart program");
 
   onSignal = false;
 
 }
 
+//The program loads the above segment to the serial monitor and then holds for a serial input
+//Once a command is given it will loop through the entire program on each trial.
+//This is useful in the sense that it allows the user the ability to stop or pause the program during the experiment.
+//The associated overhead of this method is neglible in most cases, except stim-frequency, where we needed to do a local loop for the pulsetrain.
+//Duration experiment cycles throught different durations multiple times.
+//Frequency experiment cycles through various frequencies multiple times.
 
 void loop() {
 
   while (Serial.available() > 0) {
     control_char = Serial.read();
 
-    if ( control_char == 't') {
+    if ( control_char == 't') {   //Frequency trial character
 
       // output for the sync pulse to control light stim/ camera
       //  delay(100);
@@ -94,7 +101,7 @@ void loop() {
       //  digitalWrite(PIN_GLOBAL_SYNC, LOW);
 
     }
-    else if (control_char == 's') {
+    else if (control_char == 's') {   //Duration trial character
 
 
       onSignal = true;
@@ -102,7 +109,7 @@ void loop() {
       signalChange = 0;
 
     }
-    else if (control_char == 'b') {
+    else if (control_char == 'b') {     //Stim-frequency trial character
       onSignal = true;
       Serial.println("Stim-Frequency Trial");
       signalChange = 4;
@@ -122,10 +129,13 @@ void loop() {
       signalChange = 3;
 
     }
-    else if (control_char == 'q') {
+
+    else if (control_char == 'q') {   //Quit control
       digitalWrite(PIN_GLOBAL_SYNC, LOW);
       onSignal = false;
       count = 0;
+      Serial.println();
+      delay(50); //Need delay because otherwise serial output get's messed up
       asm volatile ("  jmp 0");   // Makes the Arduino soft reset
     }
     else {
@@ -144,14 +154,14 @@ void loop() {
         onSignal = false;
         Serial.println("Trigger function stopped");
         count = 0;
-        break;
+        Serial.println();
+        delay(50);
+        asm volatile ("  jmp 0");   // Makes the Arduino soft reset
       }
       else if (control_char == 'p') {
-        digitalWrite(PIN_GLOBAL_SYNC, LOW);
-        digitalWrite(PIN_TRIGGER_PULSE, LOW);
-        onSignal = false;
-        Serial.println("Trigger function paused");
-        break;
+        Serial.flush(); //flush all previous received and transmitted data
+        Serial.println("Session paused, enter any character to resume.");
+        while (!Serial.available()) ; // hang program until a byte is received
       }
     }
     else {
@@ -383,31 +393,27 @@ void loop() {
 
         case SINGLE_FREQ:
 
-          if (count < 6) {
+          if (count < 2) {
 
-            if (loop_count < 8) {
+            if (loop_count < 10) {
 
-              if (freq_count == 0) {
+              freq = stimfreqarray[count];
+              Serial.print("Frequency:");
+              Serial.print(freq);
+              Serial.print("Hz");
+              Serial.print("  Trial#:");
+              Serial.println(loop_count + 1);
 
-                freq = freqArray[count];
-                Serial.print("Frequency:");
-                Serial.print(freq);
-                Serial.print("Hz");
-                Serial.print("  Trial#:");
-                Serial.println(loop_count + 1);
+              digitalWrite(PIN_GLOBAL_SYNC, HIGH);
+              delay(1000);
+              digitalWrite(PIN_TRIGGER_PULSE, HIGH);
+              digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
+              delay(50);
+              digitalWrite(PIN_TRIGGER_PULSE, LOW);
+              digitalWrite(PIN_TRIGGER_PULSE2, LOW);
+              delay(ISI);
 
-                digitalWrite(PIN_GLOBAL_SYNC, HIGH);
-                delay(1000);
-                digitalWrite(PIN_TRIGGER_PULSE, HIGH);
-                digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
-                delay(50);
-                digitalWrite(PIN_TRIGGER_PULSE, LOW);
-                digitalWrite(PIN_TRIGGER_PULSE2, LOW);
-                delay(ISI);
-
-              }
-
-              if (freq_count < freq) {
+              for (int i = 0; i < freq; i++) {
 
                 //            Serial.println(freq_count+1);
                 digitalWrite(PIN_TRIGGER_PULSE, HIGH);
@@ -416,18 +422,12 @@ void loop() {
                 digitalWrite(PIN_TRIGGER_PULSE, LOW);
                 digitalWrite(PIN_TRIGGER_PULSE2, LOW);
                 delay((1000 / freq) - t_duration);
-
-                freq_count++;
-
               }
-              else {
 
-                freq_count = 0;
-                delay(950);
-                digitalWrite(PIN_GLOBAL_SYNC, LOW);
-                loop_count++;
-                delay(8000);
-              }
+              delay(950);
+              digitalWrite(PIN_GLOBAL_SYNC, LOW);
+              loop_count++;
+              delay(8000);
             }
             else {
               count++;
@@ -453,10 +453,7 @@ void loop() {
       }//end of case
 
     }//end of else
-
   } //end of while
-
-
 }      //end of loop()
 
 void trigger (int duration) {
