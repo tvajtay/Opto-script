@@ -24,8 +24,8 @@ int count = 0;
 
 unsigned long timestamp;
 unsigned long pulse_start;
-boolean onSignal = false;
-boolean onPulse = false;
+bool onSignal = false;
+bool onPulse = false;
 
 int single_pulse_count = 0;
 
