@@ -452,12 +452,10 @@ void loop() {
 void trigger (int duration) {
 	digitalWrite(PIN_GLOBAL_SYNC, HIGH);
 	delay(1000);
-	//  Serial.println("Activating Light One");
+	Serial.println("Activating Light One");
 	digitalWrite(PIN_EXTERNAL_TRIGGER, HIGH);
-	// digitalWrite(PIN_EXTERNAL_TRIGGER2, HIGH);
 	digitalWrite(PIN_TRIGGER_PULSE, HIGH);
 	delay(duration);
-	//  digitalWrite(PIN_EXTERNAL_TRIGGER2, LOW);
 	digitalWrite(PIN_EXTERNAL_TRIGGER, LOW);
 	digitalWrite(PIN_TRIGGER_PULSE, LOW);
 	delay(2000 - duration);
@@ -468,13 +466,10 @@ void trigger (int duration) {
 	delay(1000);
 	Serial.println("Activating Light Two");
 	digitalWrite(PIN_EXTERNAL_TRIGGER2, HIGH);
-	// digitalWrite(PIN_EXTERNAL_TRIGGER2, HIGH);
 	digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
 	delay(duration);
-	//  digitalWrite(PIN_EXTERNAL_TRIGGER2, LOW);
 	digitalWrite(PIN_EXTERNAL_TRIGGER2, LOW);
 	digitalWrite(PIN_TRIGGER_PULSE2, LOW);
-	//delay(100);
 	delay(2000-duration);
 	digitalWrite(PIN_GLOBAL_SYNC, LOW);
 }
