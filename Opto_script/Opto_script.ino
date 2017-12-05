@@ -132,6 +132,8 @@ void loop() {
         onSignal = false;
         Serial.println("Trigger function stopped");
         count = 0;
+        delay(500);
+        asm volatile ("  jmp 0");   // Makes the Arduino soft reset
         break;
       }
       else if (control_char == 'p') {
@@ -315,5 +317,36 @@ void pulse(int duration) {
 }
 
 void e_stop() {
-
+  if (Serial.available()) {
+    control_char = Serial.read();
+    if (control_char == 'q') {
+      digitalWrite(CAMERA_PIN, LOW);
+      digitalWrite(PIN_TRIGGER_PULSE, LOW);
+      onSignal = false;
+      Serial.println("Trigger function stopped");
+      count = 0;
+      delay(500);
+      asm volatile ("  jmp 0");   // Makes the Arduino soft reset
+      break;
+    }
+    else if (control_char == 'p') {
+      digitalWrite(CAMERA_PIN, LOW);
+      digitalWrite(PIN_TRIGGER_PULSE, LOW);
+      digitalWrite(PIN_TRIGGER_PULSE2, LOW);
+      pause_start = millis();
+      Serial.println("Trigger function paused, enter 'r' to resume");
+      while (Serial.available()) {
+        control_char = Serial.read();
+        if (control_char == 'r') {
+          Serial.print("Paused for ");
+          Serial.print((pause_start - millis())/1000);
+          Serial.println(" seconds");
+          break;
+        }
+        else {
+          Serial.println("That wasn't 'r' ");
+        }
+      }
+    }
+  }
 }
