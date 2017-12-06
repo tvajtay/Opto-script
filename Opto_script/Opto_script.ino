@@ -275,6 +275,8 @@ void loop() {
 
           break;
       }//end of case
+      delay(500);
+      asm volatile ("  jmp 0");   // Makes the Arduino soft reset
     }//end of else
   }//end of while
 }//end of loop()
