@@ -120,32 +120,34 @@ void loop() {
     else {
       Serial.println("Enter either s, t, b, i, or o");
     }
-
   }
 
   while (onSignal) {   //During the experiment this part loops for every unique trial allowing for pause/quit in the middle of a run
     e_stop();
-    
+
     switch (signalChange) {
       case SINGLEPULSE:  //for single pulse with duration change
-        if (count < 8) {
+        while (count < 8) {
           if (single_pulse_count < 8) {
             if (single_pulse_count == 0) {
-              Serial.print("Trial #:\t");
+              Serial.print("Trial #:");
               Serial.print(count + 1);
               Serial.print("\t");
               Serial.print((millis() - timestamp)/1000);
               Serial.println(" seconds since start");
             }
             Serial.print(pulseArray[single_pulse_count]);
-            Serial.println("msec duration");
+            Serial.println(" msec duration");
 
-            Serial.println("Activating Light One");
-            pulse(pulseArray[single_pulse_count])
+            Serial.print("Activating Light One ");
+            Serial.println((millis() - timestamp)/1000);
+            pulse(pulseArray[single_pulse_count]);
             iti_delay(ITI);
 
-            Serial.println("Activating Light Two");
-            pulse2(pulseArray[single_pulse_count])
+            Serial.print("Activating Light Two ");
+            Serial.println((millis() - timestamp)/1000);
+            Serial.println();
+            pulse2(pulseArray[single_pulse_count]);
             iti_delay(ITI);
 
             single_pulse_count ++;
@@ -155,27 +157,28 @@ void loop() {
             single_pulse_count = 0;
           }
         }
-        else {
+        onSignal = 0;
+        count = 0;
         Serial.println("Duration Trial complete");
+        Serial.print((millis() - timestamp)/1000);
+        Serial.println(" seconds since start");
+        Serial.println();
         break;
-        }
 
       case FREQUENCY:
-        if (count < 6) {
+        while (count < 6) {
           if (loop_count < 8) {
             if (loop_count == 0) {
 
               freq = freqArray[count];
               Serial.print("Frequency:");
               Serial.print(freq);
-              Serial.println("Hz");
-              Serial.print("Trial#:");
-              Serial.print(loop_count + 1);
+              Serial.print("Hz");
               Serial.print("\t");
               Serial.print((millis() - timestamp)/1000);
               Serial.println(" seconds since start");
             }
-
+            Serial.println(loop_count + 1);
             digitalWrite(CAMERA_PIN, HIGH);
             delay(1000);
             while (freq_count < freq) {
@@ -191,7 +194,7 @@ void loop() {
             delay(1000);
             digitalWrite(CAMERA_PIN, LOW);
             loop_count++;
-            delay(ITI);
+            iti_delay(ITI);
           }
           else {
             count++;
@@ -201,39 +204,43 @@ void loop() {
             digitalWrite(PIN_TRIGGER_PULSE2, LOW);
           }
         }
-        else {
-          digitalWrite(CAMERA_PIN, LOW);
-          digitalWrite(PIN_TRIGGER_PULSE, LOW);
-          digitalWrite(PIN_TRIGGER_PULSE2, LOW);
-          onSignal = 0;
-          count = 0;
-        }
+        onSignal = 0;
+        count = 0;
         Serial.println("Frequency Trial complete");
+        Serial.print((millis() - timestamp)/1000);
+        Serial.println(" seconds since start");
+        Serial.println();
         break;
 
       case INTENSITYONE:
         while (count < 15) {
           pulse(50);
-          Serial.println(count);
+          Serial.println(count + 1);
           iti_delay(ITI);
           count++;
         }
         onSignal = 0;
         count = 0;
         Serial.println("15 Trials complete");
+        Serial.print((millis() - timestamp)/1000);
+        Serial.println(" seconds since start");
+        Serial.println();
 
         break;
 
       case INTENSITYTWO:
         while (count < 8) {
           pulse(50);
-          Serial.println(count);
+          Serial.println(count + 1);
           iti_delay(ITI);
           count++;
         }
         onSignal = 0;
         count = 0;
         Serial.println("8 Trials complete");
+        Serial.print((millis() - timestamp)/1000);
+        Serial.println(" seconds since start");
+        Serial.println();
 
         break;
     }//end of case
@@ -243,7 +250,7 @@ void loop() {
 }//end of loop()
 
 void pulse(int duration) {
-  delay_start = millis();
+  double delay_start = millis();
   while (millis() - delay_start < 3000) {
     digitalWrite(CAMERA_PIN, HIGH);
     e_stop();
@@ -258,7 +265,7 @@ void pulse(int duration) {
 }
 
 void pulse2(int duration) {
-  delay_start = millis();
+  double delay_start = millis();
   while (millis() - delay_start < 3000) {
     digitalWrite(CAMERA_PIN, HIGH);
     e_stop();
@@ -273,7 +280,7 @@ void pulse2(int duration) {
 }
 
 void iti_delay(int duration) {
-  ITI_start = millis();
+  double ITI_start = millis();
   while (millis() - ITI_start < duration ){
     e_stop();
   }
@@ -291,13 +298,12 @@ void e_stop() {
       count = 0;
       delay(500);
       asm volatile ("  jmp 0");   // Makes the Arduino soft reset
-      break;
     }
     else if (control_char == 'p') {
       digitalWrite(CAMERA_PIN, LOW);
       digitalWrite(PIN_TRIGGER_PULSE, LOW);
       digitalWrite(PIN_TRIGGER_PULSE2, LOW);
-      pause_start = millis();
+      double pause_start = millis();
       Serial.println("Trigger function paused, enter 'r' to resume");
       while (Serial.available()) {
         control_char = Serial.read();
