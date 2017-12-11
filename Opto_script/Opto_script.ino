@@ -181,11 +181,29 @@ void loop() {
             Serial.println(loop_count + 1);
             digitalWrite(CAMERA_PIN, HIGH);
             delay(1000);
-            while (freq_count < freq) {
+            while (freq_count < freq) {     //Loop for first light
               digitalWrite(PIN_TRIGGER_PULSE, HIGH);
-              digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
+              //digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
               delay(t_duration);
               digitalWrite(PIN_TRIGGER_PULSE, LOW);
+              //digitalWrite(PIN_TRIGGER_PULSE2, LOW);
+              delay((1000 / freq) - t_duration);
+              freq_count++;
+            }
+            freq_count = 0;
+            delay(1000);
+            digitalWrite(CAMERA_PIN, LOW);
+
+            iti_delay(ITI);
+
+            Serial.println(loop_count + 1);
+            digitalWrite(CAMERA_PIN, HIGH);
+            delay(1000);
+            while (freq_count < freq) {       //Loop for second light
+              //digitalWrite(PIN_TRIGGER_PULSE, HIGH);
+              digitalWrite(PIN_TRIGGER_PULSE2, HIGH);
+              delay(t_duration);
+              //digitalWrite(PIN_TRIGGER_PULSE, LOW);
               digitalWrite(PIN_TRIGGER_PULSE2, LOW);
               delay((1000 / freq) - t_duration);
               freq_count++;
