@@ -233,12 +233,12 @@ void loop() {
       case INTENSITYONE:
         while (count < 15) {
           pulse(50);
-          Serial.print("Light 1 ")
+          Serial.print("Light 1 ");
           Serial.println(count + 1);
           iti_delay(ITI);
 
           pulse2(50);
-          Serial.print("Light 2 ")
+          Serial.print("Light 2 ");
           Serial.println(count + 1);
           iti_delay(ITI);
           count++;
@@ -255,12 +255,12 @@ void loop() {
       case INTENSITYTWO:
         while (count < 8) {
           pulse(50);
-          Serial.print("Light 1 ")
+          Serial.print("Light 1 ");
           Serial.println(count + 1);
           iti_delay(ITI);
 
           pulse2(50);
-          Serial.print("Light 2 ")
+          Serial.print("Light 2 ");
           Serial.println(count + 1);
           iti_delay(ITI);
           count++;
